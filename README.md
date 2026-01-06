@@ -1,8 +1,20 @@
 # HR Outsourcing Platform (Laravel 11)
 
-Multi-tenant HR outsourcing platform with strict tenant isolation, Sanctum auth, and Blade UI.
+A multi-tenant HR outsourcing platform built with **Laravel 11**, featuring strict tenant isolation, **Sanctum** authentication, and a **Blade** UI.
 
-## Quick Start
+---
+
+## ✨ Features
+
+- Multi-tenant architecture with strong data isolation  
+- Role-based access control (Admin, HR, Company Admin, Employee)  
+- Sanctum API authentication (Bearer tokens)  
+- Public and protected API endpoints  
+- Seeded demo data for instant testing  
+
+---
+
+## 🚀 Quick Start
 
 ```bash
 composer install
@@ -13,72 +25,120 @@ php artisan migrate:fresh --seed
 php artisan serve
 ```
 
-Visit `http://localhost:8000/login` and use the demo credentials below.
+Open:  
+👉 `http://localhost:8000/login` and log in using the demo credentials below.
 
-## Setup
+---
 
-1) Install dependencies
+## ⚙️ Setup
 
+### 1. Install dependencies
 ```bash
 composer install
 ```
 
-2) Create environment file
-
+### 2. Create environment file
 ```bash
 cp .env.example .env
 ```
 
-3) Generate app key
-
+### 3. Generate application key
 ```bash
 php artisan key:generate
 ```
 
-4) Prepare SQLite database
-
+### 4. Prepare SQLite database
 ```bash
 mkdir -p database
 [ -f database/database.sqlite ] || touch database/database.sqlite
 ```
 
-5) Run migrations + seed demo data
-
+### 5. Run migrations and seed demo data
 ```bash
 php artisan migrate --seed
 ```
 
-6) Start the dev server
-
+### 6. Start the development server
 ```bash
 php artisan serve
 ```
 
-## Demo Users (seeded)
+---
 
-All seeded users use password `password`.
+## 👤 Demo Users (Seeded)
 
-- Admin: `admin@platform.test` / `password`
-- HR: `hr@platform.test` / `password`
-- Company Admins:
-  - `acme-corp_admin@platform.test` / `password`
-  - `globex-inc_admin@platform.test` / `password`
-- Employees:
-  - `acme-corp_employee1@platform.test` / `password`
-  - `acme-corp_employee2@platform.test` / `password`
-  - `globex-inc_employee1@platform.test` / `password`
-  - `globex-inc_employee2@platform.test` / `password`
+All demo accounts use the password: **`password`**
 
-## Notes
+### Admin
+- `admin@platform.test`
 
-- SQLite is configured in `.env.example` by default.
-- Sanctum is installed for API authentication.
-- Absences enforce unique (user_id, date) at the DB level and the app returns 422 on duplicates.
+### HR
+- `hr@platform.test`
 
-## Manual Verification Checklist
+### Company Admins
+- `acme-corp_admin@platform.test`
+- `globex-inc_admin@platform.test`
 
-1) Setup
+### Employees
+- `acme-corp_employee1@platform.test`
+- `acme-corp_employee2@platform.test`
+- `globex-inc_employee1@platform.test`
+- `globex-inc_employee2@platform.test`
 
+---
+
+## 📝 Notes
+
+- SQLite is configured by default in `.env.example`.  
+- API authentication is handled using **Laravel Sanctum**.  
+- Absences enforce a unique constraint on `(user_id, date)` at the database level; duplicates return **422 Unprocessable Entity**.
+
+---
+
+## 🔐 API Authentication (Bearer Token)
+
+Use the login endpoint to retrieve a token, then include it in the `Authorization` header for protected routes.
+
+### Login Endpoint
+```
+POST /api/v1/auth/login
+```
+
+**Body parameters**
+- `email` (required)
+- `password` (required)
+- `device_name` (optional, defaults to `api`)
+
+**Example request**
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@platform.test",
+    "password": "password",
+    "device_name": "local"
+  }'
+```
+
+**Example response**
+```json
+{
+  "token": "YOUR_TOKEN",
+  "token_type": "Bearer"
+}
+```
+
+**Using the token**
+```bash
+curl http://localhost:8000/api/v1/companies/1/vacancies \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+---
+
+## ✅ Manual Verification Checklist
+
+### 1. Setup
 ```bash
 cp .env.example .env
 php artisan key:generate
@@ -87,39 +147,52 @@ php artisan migrate:fresh --seed
 php artisan serve
 ```
 
-2) Routes to verify
+### 2. Routes to verify
+- **Public API:** `GET /api/v1/public/vacancies`  
+- **Public API:** `GET /api/v1/public/vacancies/1`  
+- **Authenticated API:** `POST /api/v1/companies/{company}/vacancies` (Admin, HR, Company Admin)
 
-- Public API: `GET /api/v1/public/vacancies`
-- Auth API: `POST /api/v1/companies/{company}/vacancies` (Admin/HR/Company Admin)
-- Employee: `/me/attendance`, `/me/leave-requests`
-- Company approvals: `/companies/{company}/leave-requests`
-- Absences: `/companies/{company}/absences`
+### 3. Test credentials
+- Admin: `admin@platform.test` / `password`  
+- HR: `hr@platform.test` / `password`  
+- Company Admin: `acme-corp_admin@platform.test` / `password`  
+- Employee: `acme-corp_employee1@platform.test` / `password`  
 
-3) Demo credentials
+---
 
-- Admin: `admin@platform.test` / `password`
-- HR: `hr@platform.test` / `password`
-- Company Admin: `acme-corp_admin@platform.test` / `password`
-- Employee: `acme-corp_employee1@platform.test` / `password`
+## 🏗 Architecture & Tenant Isolation
 
-## Architecture & Tenant Isolation
+- Every tenant-owned table includes `company_id` (e.g., vacancies, positions, leave requests, absences, attendances).  
+- `EnsureCompanyAccess` middleware protects `/companies/{company}/...` routes and prevents cross-tenant access.  
+- Authorization policies enforce role-based permissions:  
+  - **Admin/HR:** global access  
+  - **Company Admin:** access within their company  
+  - **Employee:** self-only access  
+- `CompanyScope` global scope automatically filters records by `company_id` for non-Admin/HR users.  
+- Admin/HR users bypass tenant restrictions via policy `before` checks.
 
-- `company_id` is present on all tenant-owned tables (vacancies, positions, leave requests, absences, attendances).
-- `EnsureCompanyAccess` middleware protects `/companies/{company}/...` routes and blocks cross-tenant access.
-- Policies enforce role-based actions (Admin/HR global, Company Admin within company, Employee self-only).
-- `CompanyScope` global scope filters tenant models by `company_id` for non HR/Admin users; HR/Admin bypass via policy `before` check.
+---
 
-## API Reference (v1)
+## 📚 API Reference (v1)
 
-### Public vacancies
+### Authentication
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@platform.test",
+    "password": "password",
+    "device_name": "local"
+  }'
+```
 
+### Public Vacancies
 ```bash
 curl http://localhost:8000/api/v1/public/vacancies
 curl http://localhost:8000/api/v1/public/vacancies/1
 ```
 
-### Auth vacancy create
-
+### Create Vacancy (Authenticated)
 ```bash
 curl -X POST http://localhost:8000/api/v1/companies/1/vacancies \
   -H "Authorization: Bearer <token>" \
@@ -134,246 +207,10 @@ curl -X POST http://localhost:8000/api/v1/companies/1/vacancies \
   }'
 ```
 
-### Attendance check-in/out
+---
 
-```bash
-curl -X POST http://localhost:8000/api/v1/me/attendance/check-in \
-  -H "Authorization: Bearer <token>"
-curl -X POST http://localhost:8000/api/v1/me/attendance/check-out \
-  -H "Authorization: Bearer <token>"
-```
-
-### Leave requests
-
-```bash
-curl -X POST http://localhost:8000/api/v1/me/leave-requests \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "start_date": "2026-01-10",
-    "end_date": "2026-01-12",
-    "reason": "Medical appointment",
-    "type": "sick"
-  }'
-curl http://localhost:8000/api/v1/me/leave-requests \
-  -H "Authorization: Bearer <token>"
-curl -X PATCH http://localhost:8000/api/v1/companies/1/leave-requests/10/approve \
-  -H "Authorization: Bearer <token>"
-curl -X PATCH http://localhost:8000/api/v1/companies/1/leave-requests/10/reject \
-  -H "Authorization: Bearer <token>"
-```
-
-### Absences
-
-```bash
-curl -X POST http://localhost:8000/api/v1/companies/1/absences \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": 5,
-    "date": "2026-01-06",
-    "reason": "Unplanned absence"
-  }'
-curl http://localhost:8000/api/v1/companies/1/absences \
-  -H "Authorization: Bearer <token>"
-```
-
-## Running Tests
+## 🧪 Running Tests
 
 ```bash
 php artisan test
-```
-
-Relevant test classes:
-- `tests/Feature/TenantIsolationTest.php`
-- `tests/Feature/PublicVacanciesTest.php`
-- `tests/Feature/VacancyCreateTest.php`
-- `tests/Feature/AttendanceCheckTest.php`
-- `tests/Feature/LeaveRequestsTest.php`
-- `tests/Feature/AbsenceTest.php`
-
-## Public Vacancies API
-
-### List vacancies
-
-```bash
-curl http://localhost:8000/api/v1/public/vacancies
-```
-
-Example response:
-
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "title": "Backend Developer",
-      "description": "Build and maintain APIs for internal platforms.",
-      "location": "Remote",
-      "employment_type": "full_time",
-      "published_at": "2026-01-04T10:00:00Z",
-      "expiration_date": "2026-02-04"
-    }
-  ],
-  "meta": {
-    "current_page": 1,
-    "per_page": 10,
-    "total": 1
-  }
-}
-```
-
-### Vacancy detail
-
-```bash
-curl http://localhost:8000/api/v1/public/vacancies/1
-```
-
-Example response:
-
-```json
-{
-  "data": {
-    "id": 1,
-    "title": "Backend Developer",
-    "description": "Build and maintain APIs for internal platforms.",
-    "location": "Remote",
-    "employment_type": "full_time",
-    "published_at": "2026-01-04T10:00:00Z",
-    "expiration_date": "2026-02-04"
-  }
-}
-```
-
-## Auth Vacancy Create API
-
-### Create vacancy (requires Bearer token)
-
-```bash
-curl -X POST http://localhost:8000/api/v1/companies/1/vacancies \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "QA Engineer",
-    "description": "Own test plans and automation.",
-    "location": "Remote",
-    "employment_type": "contract",
-    "status": "published",
-    "expiration_date": "2026-02-15"
-  }'
-```
-
-Example response:
-
-```json
-{
-  "data": {
-    "id": 10,
-    "title": "QA Engineer",
-    "description": "Own test plans and automation.",
-    "location": "Remote",
-    "employment_type": "contract",
-    "published_at": "2026-01-05T10:00:00Z",
-    "expiration_date": "2026-02-15"
-  }
-}
-```
-
-## Attendance (Self-Service)
-
-### Check-in
-
-```bash
-curl -X POST http://localhost:8000/api/v1/me/attendance/check-in \
-  -H "Authorization: Bearer <token>"
-```
-
-Example response:
-
-```json
-{
-  "data": {
-    "date": "2026-01-05",
-    "check_in_at": "2026-01-05T09:00:00Z",
-    "check_out_at": null
-  }
-}
-```
-
-### Check-out
-
-```bash
-curl -X POST http://localhost:8000/api/v1/me/attendance/check-out \
-  -H "Authorization: Bearer <token>"
-```
-
-Example response:
-
-```json
-{
-  "data": {
-    "date": "2026-01-05",
-    "check_in_at": "2026-01-05T09:00:00Z",
-    "check_out_at": "2026-01-05T17:00:00Z"
-  }
-}
-```
-
-## Leave Requests
-
-### Create leave request (self)
-
-```bash
-curl -X POST http://localhost:8000/api/v1/me/leave-requests \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "start_date": "2026-01-10",
-    "end_date": "2026-01-12",
-    "reason": "Medical appointment",
-    "type": "sick"
-  }'
-```
-
-### List my leave requests
-
-```bash
-curl http://localhost:8000/api/v1/me/leave-requests \
-  -H "Authorization: Bearer <token>"
-```
-
-### Approve leave request (Company Admin/HR/Admin)
-
-```bash
-curl -X PATCH http://localhost:8000/api/v1/companies/1/leave-requests/10/approve \
-  -H "Authorization: Bearer <token>"
-```
-
-### Reject leave request (Company Admin/HR/Admin)
-
-```bash
-curl -X PATCH http://localhost:8000/api/v1/companies/1/leave-requests/10/reject \
-  -H "Authorization: Bearer <token>"
-```
-
-## Absences (HR / Company Admin)
-
-### Create absence
-
-```bash
-curl -X POST http://localhost:8000/api/v1/companies/1/absences \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user_id": 5,
-    "date": "2026-01-06",
-    "reason": "Unplanned absence"
-  }'
-```
-
-### List absences
-
-```bash
-curl http://localhost:8000/api/v1/companies/1/absences \
-  -H "Authorization: Bearer <token>"
 ```
