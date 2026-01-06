@@ -63,7 +63,7 @@ php artisan migrate --seed
 php artisan test
 ```
 
-### 6. Start the development server
+### 7. Start the development server
 ```bash
 php artisan serve
 ```
