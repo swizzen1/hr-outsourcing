@@ -12,11 +12,17 @@ A multi-tenant HR outsourcing platform built with **Laravel 11**, featuring stri
 - Public and protected API endpoints  
 - Seeded demo data for instant testing  
 
+## ✅ Supported PHP Version
+
+- PHP **8.2 – 8.4**
+
 ---
 
 ## 🚀 Quick Start
 
 ```bash
+git clone https://github.com/swizzen1/hr-outsourcing
+cd hr-outsourcing
 composer install
 cp .env.example .env
 php artisan key:generate
@@ -31,6 +37,12 @@ Open:
 ---
 
 ## ⚙️ Setup
+
+### 0. Clone the repository
+```bash
+git clone https://github.com/swizzen1/hr-outsourcing
+cd hr-outsourcing
+```
 
 ### 1. Install dependencies
 ```bash
