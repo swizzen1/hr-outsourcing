@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Models\User;
+use App\Models\Absence;
+use App\Models\Company;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Gate;
 use App\Actions\Absences\CreateAbsence;
 use App\Actions\Support\ActionException;
 use App\Http\Requests\StoreAbsenceRequest;
-use App\Models\Absence;
-use App\Models\Company;
-use Illuminate\Support\Facades\Gate;
 
 class CompanyAbsenceController extends Controller
 {
