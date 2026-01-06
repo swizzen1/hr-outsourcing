@@ -57,6 +57,11 @@ mkdir -p database
 ```bash
 php artisan migrate --seed
 ```
+### 6. Running Tests
+
+```bash
+php artisan test
+```
 
 ### 6. Start the development server
 ```bash
@@ -70,20 +75,20 @@ php artisan serve
 All demo accounts use the password: **`password`**
 
 ### Admin
-- `admin@platform.test`
+- `admin@hr-sourcing.test`
 
 ### HR
-- `hr@platform.test`
+- `hr@hr-sourcing.test`
 
 ### Company Admins
-- `acme-corp_admin@platform.test`
-- `globex-inc_admin@platform.test`
+- `acme-corp_admin@hr-sourcing.test`
+- `globex-inc_admin@hr-sourcing.test`
 
 ### Employees
-- `acme-corp_employee1@platform.test`
-- `acme-corp_employee2@platform.test`
-- `globex-inc_employee1@platform.test`
-- `globex-inc_employee2@platform.test`
+- `acme-corp_employee1@hr-sourcing.test`
+- `acme-corp_employee2@hr-sourcing.test`
+- `globex-inc_employee1@hr-sourcing.test`
+- `globex-inc_employee2@hr-sourcing.test`
 
 ---
 
@@ -114,7 +119,7 @@ POST /api/v1/auth/login
 curl -X POST http://localhost:8000/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@platform.test",
+    "email": "admin@hr-sourcing.test",
     "password": "password",
     "device_name": "local"
   }'
@@ -153,10 +158,10 @@ php artisan serve
 - **Authenticated API:** `POST /api/v1/companies/{company}/vacancies` (Admin, HR, Company Admin)
 
 ### 3. Test credentials
-- Admin: `admin@platform.test` / `password`  
-- HR: `hr@platform.test` / `password`  
-- Company Admin: `acme-corp_admin@platform.test` / `password`  
-- Employee: `acme-corp_employee1@platform.test` / `password`  
+- Admin: `admin@hr-sourcing.test` / `password`  
+- HR: `hr@hr-sourcing.test` / `password`  
+- Company Admin: `acme-corp_admin@hr-sourcing.test` / `password`  
+- Employee: `acme-corp_employee1@hr-sourcing.test` / `password`  
 
 ---
 
@@ -180,7 +185,7 @@ php artisan serve
 curl -X POST http://localhost:8000/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@platform.test",
+    "email": "admin@hr-sourcing.test",
     "password": "password",
     "device_name": "local"
   }'
@@ -205,12 +210,4 @@ curl -X POST http://localhost:8000/api/v1/companies/1/vacancies \
     "status": "published",
     "expiration_date": "2026-02-15"
   }'
-```
-
----
-
-## 🧪 Running Tests
-
-```bash
-php artisan test
 ```
