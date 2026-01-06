@@ -11,12 +11,11 @@ use App\Models\Company;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
+
     Route::prefix('public')->group(function () {
         Route::get('vacancies', [PublicVacancyController::class, 'index']);
         Route::get('vacancies/{id}', [PublicVacancyController::class, 'show']);
     });
-
-    Route::post('auth/login', [ApiAuthController::class, 'login']);
 
     Route::middleware(['auth:sanctum', 'company.access'])->group(function () {
         Route::get('companies/{company}/ping', function (Company $company) {
@@ -28,4 +27,6 @@ Route::prefix('v1')->group(function () {
 
         Route::post('companies/{company}/vacancies', [CompanyVacancyController::class, 'store']);
     });
+
+    Route::post('auth/login', [ApiAuthController::class, 'login']);
 });

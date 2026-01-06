@@ -2,25 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Auth\Autorization;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
-    public function login(LoginRequest $request)
+    public function login(LoginRequest $request, Autorization $authorization): JsonResponse
     {
         $data = $request->validated();
 
-        /** @var User|null $user */
-        $user = User::where('email', $data['email'])->first();
-
-        if (!$user || !Hash::check($data['password'], $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-
-        $token = $user->createToken($data['device_name'] ?? 'api')->plainTextToken;
+        $token = $authorization->getBearerToken($data);
 
         return response()->json([
             'token' => $token,
